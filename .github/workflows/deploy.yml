@@ -10,11 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout del repositorio
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    # 2. Configurar acceso SSH
+    # 1. Configurar acceso SSH
     - name: Configure SSH access
       run: |
         mkdir -p ~/.ssh
@@ -25,8 +21,8 @@ jobs:
         |1|eZivNjLUFdrYuvnjzOWd7/3hf0A=|zD4YAoSefrkWlLFimIFbRfkjfA0= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHbVwOFAJETZIf01Al4EsiGLJBQhDXIaMPNWPkHzG9E
         EOL
 
-    # 3. Clonar el repositorio en la instancia EC2
-    - name: Clone Repository on EC2
+    # 2. Sincronizar el repositorio en EC2 y desplegar
+    - name: Sync Repository and Deploy
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "
           if [ ! -d ~/ProyectoDevops ]; then
@@ -34,12 +30,6 @@ jobs:
           else
             cd ~/ProyectoDevops && git pull origin main;
           fi
-        "
-
-    # 4. Desplegar en Kubernetes
-    - name: Deploy to Kubernetes
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "
           cd ~/ProyectoDevops &&
           chmod +x deploy_k8s.sh &&
           ./deploy_k8s.sh

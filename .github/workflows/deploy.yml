@@ -1,0 +1,30 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Configure SSH access
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.AWS_PEM_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo -e "Host ec2-instance\n\tHostName ec2-54-235-18-148.compute-1.amazonaws.com\n\tUser ec2-user\n\tIdentityFile ~/.ssh/id_rsa" > ~/.ssh/config
+        ssh-keyscan -H ec2-54-235-18-148.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+
+    - name: Copy files to EC2
+      run: |
+        scp -r ./namespace.yaml ./backend-deployment.yaml ./backend-service.yaml ./frontend-deployment.yaml ./frontend-service.yaml ./deploy_k8s.sh ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com:~/
+
+    - name: Deploy to Kubernetes
+      run: |
+        ssh ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "chmod +x ~/deploy_k8s.sh && ~/deploy_k8s.sh"

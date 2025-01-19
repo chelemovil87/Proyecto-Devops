@@ -15,20 +15,6 @@ spec:
     spec:
       containers:
       - name: backend
-        image: avatar-backend:latest
+        image: chelemovil87/proyectodevops-backend:v1.0
         ports:
         - containerPort: 5000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-service
-  namespace: production
-spec:
-  selector:
-    app: backend
-  ports:
-  - protocol: TCP
-    port: 5001
-    targetPort: 5000
-  type: NodePort

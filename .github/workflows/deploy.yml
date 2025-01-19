@@ -18,8 +18,8 @@ jobs:
     - name: Configure SSH access
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.AWS_PEM_KEY }}" > ~/.ssh/Key-Avatares.pem
-        chmod 600 ~/.ssh/Key-Avatares.pem
+        echo "${{ secrets.AWS_PEM_KEY }}" > ~/.ssh/Key-Avatares-SSH.pem
+        chmod 600 ~/.ssh/Key-Avatares-SSH.pem
         ssh-keyscan -H ec2-54-235-18-148.compute-1.amazonaws.com >> ~/.ssh/known_hosts
 
     # 3. Copiar archivos al servidor EC2

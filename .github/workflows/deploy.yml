@@ -25,12 +25,22 @@ jobs:
         |1|eZivNjLUFdrYuvnjzOWd7/3hf0A=|zD4YAoSefrkWlLFimIFbRfkjfA0= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHbVwOFAJETZIf01Al4EsiGLJBQhDXIaMPNWPkHzG9E
         EOL
 
-    # 3. Copiar archivos al servidor EC2
-    - name: Copy files to EC2
+    # 3. Clonar el repositorio en la instancia EC2
+    - name: Clone Repository on EC2
       run: |
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem -r ./namespace.yaml ./backend-deployment.yaml ./backend-service.yaml ./frontend-deployment.yaml ./frontend-service.yaml ./deploy_k8s.sh ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com:~/
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "
+          if [ ! -d ~/ProyectoDevops ]; then
+            git clone https://github.com/tu_usuario/tu_repositorio.git ~/ProyectoDevops;
+          else
+            cd ~/ProyectoDevops && git pull origin main;
+          fi
+        "
 
     # 4. Desplegar en Kubernetes
     - name: Deploy to Kubernetes
       run: |
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "chmod +x ~/deploy_k8s.sh && ~/deploy_k8s.sh"
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "
+          cd ~/ProyectoDevops &&
+          chmod +x deploy_k8s.sh &&
+          ./deploy_k8s.sh
+        "

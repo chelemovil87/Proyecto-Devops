@@ -1,0 +1,14 @@
+FROM node:18-alpine AS build
+
+WORKDIR /app
+COPY package.json .
+RUN npm install
+
+# Copia todo al contenedor
+COPY . .
+
+# Expone el puerto 5173
+EXPOSE 5173
+
+# Inicia el servidor de desarrollo de Vite y fuerza la escucha en todas las interfaces
+CMD ["npm", "run", "dev", "--", "--host"]

@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: chelemovil87/proyectodevops-frontend:v1.0
+        image: chelemovil87/proyectodevops-frontend:v2.0
         ports:
         - containerPort: 80

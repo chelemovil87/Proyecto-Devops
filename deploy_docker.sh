@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------------
 # Script de despliegue LOCAL y subida a Docker Hub para la aplicación Avatares.
-# Utiliza Docker Compose para gestionar los servicios e incluye la subida de imágenes.
+# Utiliza Docker Buildx para construir imágenes multiplataforma.
 #
 # Uso:
 #   ./deploy_docker.sh dev
@@ -19,10 +19,12 @@ RESET='\033[0m'
 
 # ==================== VARIABLES ==================== #
 ENVIRONMENT="$1"
-DOCKER_USER="chelemovil87" # Cambia esto por tu usuario de Docker Hub
+DOCKER_USER="chelemovil87"
 BACKEND_IMAGE="$DOCKER_USER/proyectodevops-backend"
 FRONTEND_IMAGE="$DOCKER_USER/proyectodevops-frontend"
-TAG="v1.0"
+TAG="v2.0"
+# Multiplataforma
+PLATFORMS="linux/amd64,linux/arm64"
 # ==================================================== #
 
 if [ -z "$ENVIRONMENT" ]; then
@@ -35,41 +37,34 @@ echo -e "${YELLOW}========================================${RESET}"
 echo -e "${YELLOW} Despliegue Docker en entorno: ${BOLD}$ENVIRONMENT${RESET}"
 echo -e "${YELLOW}========================================${RESET}"
 
-# 1. Construir y etiquetar imágenes
-echo -e "${BLUE}[1/4]${RESET} ${BOLD}Construyendo imágenes Docker...${RESET}"
+# 1. Configurar Docker Buildx
+echo -e "${BLUE}[1/5]${RESET} ${BOLD}Configurando Docker Buildx...${RESET}"
+docker buildx create --use --name avatares-builder > /dev/null 2>&1 || true
+docker buildx inspect avatares-builder --bootstrap
 
-docker-compose -f docker-compose.yml build
+# 2. Construir imágenes multiplataforma
+echo -e "${BLUE}[2/5]${RESET} ${BOLD}Construyendo imágenes multiplataforma...${RESET}"
+
+# Construir y subir la imagen del backend
+docker buildx build --platform $PLATFORMS -t $BACKEND_IMAGE:$TAG --push -f api/Dockerfile.backend api
 
 if [ $? -ne 0 ]; then
-  echo -e "${RED}ERROR:${RESET} Falló la construcción de las imágenes."
+  echo -e "${RED}ERROR:${RESET} Falló la construcción o subida de la imagen del backend."
   exit 1
 fi
 
-echo -e "${GREEN}Imágenes construidas con éxito.${RESET}"
-
-# 2. Etiquetar imágenes para Docker Hub
-echo -e "${BLUE}[2/4]${RESET} ${BOLD}Etiquetando imágenes...${RESET}"
-
-docker tag proyectodevops-backend:latest $BACKEND_IMAGE:$TAG
-docker tag proyectodevops-frontend:latest $FRONTEND_IMAGE:$TAG
-
-echo -e "${GREEN}Imágenes etiquetadas con éxito.${RESET}"
-
-# 3. Subir imágenes a Docker Hub
-echo -e "${BLUE}[3/4]${RESET} ${BOLD}Subiendo imágenes a Docker Hub...${RESET}"
-
-docker push $BACKEND_IMAGE:$TAG
-docker push $FRONTEND_IMAGE:$TAG
+# Construir y subir la imagen del frontend
+docker buildx build --platform $PLATFORMS -t $FRONTEND_IMAGE:$TAG --push -f web/Dockerfile.frontend web
 
 if [ $? -ne 0 ]; then
-  echo -e "${RED}ERROR:${RESET} Falló la subida de las imágenes a Docker Hub."
+  echo -e "${RED}ERROR:${RESET} Falló la construcción o subida de la imagen del frontend."
   exit 1
 fi
 
-echo -e "${GREEN}Imágenes subidas con éxito a Docker Hub.${RESET}"
+echo -e "${GREEN}Imágenes construidas y subidas con éxito a Docker Hub.${RESET}"
 
-# 4. Arrancar servicios con docker-compose
-echo -e "${BLUE}[4/4]${RESET} ${BOLD}Desplegando servicios...${RESET}"
+# 3. Arrancar servicios con docker-compose
+echo -e "${BLUE}[3/5]${RESET} ${BOLD}Desplegando servicios...${RESET}"
 
 docker-compose -f docker-compose.yml up --build -d
 
@@ -80,8 +75,8 @@ fi
 
 echo -e "${GREEN}Servicios desplegados con éxito.${RESET}"
 
-# 5. Verificar servicios en ejecución
-echo -e "${BLUE}Verificando servicios en ejecución...${RESET}"
+# 4. Verificar servicios en ejecución
+echo -e "${BLUE}[4/5]${RESET} ${BOLD}Verificando servicios en ejecución...${RESET}"
 docker-compose ps
 
 echo -e "${YELLOW}========================================${RESET}"
@@ -89,3 +84,9 @@ echo -e "${YELLOW} Despliegue completado con éxito en entorno: ${BOLD}$ENVIRONM
 echo -e "${YELLOW} Backend: http://localhost:5001${RESET}"
 echo -e "${YELLOW} Frontend: http://localhost:5173${RESET}"
 echo -e "${YELLOW}========================================${RESET}"
+
+# 5. Limpiar el entorno de buildx (opcional)
+echo -e "${BLUE}[5/5]${RESET} ${BOLD}Limpiando entorno de Buildx...${RESET}"
+docker buildx rm avatares-builder > /dev/null 2>&1 || true
+
+echo -e "${GREEN}Script finalizado.${RESET}"

@@ -28,7 +28,7 @@ jobs:
     # 3. Sincronizar el repositorio en EC2 y desplegar
     - name: Sync Repository and Deploy
       run: |
-        ssh -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "
+        ssh -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com
           if [ ! -d ~/ProyectoDevops ]; then
             git clone https://github.com/chelemovil87/Proyecto-Devops-.git ~/ProyectoDevops;
           else

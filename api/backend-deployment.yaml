@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: backend
-        image: chelemovil87/proyectodevops-backend:v1.0
+        image: chelemovil87/proyectodevops-backend:v2.0
         ports:
         - containerPort: 5000

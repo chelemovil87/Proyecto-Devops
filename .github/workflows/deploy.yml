@@ -16,9 +16,9 @@ jobs:
     - name: Configure SSH access
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.AWS_PEM_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        echo -e "Host ec2-instance\n\tHostName ec2-54-235-18-148.compute-1.amazonaws.com\n\tUser ec2-user\n\tIdentityFile ~/.ssh/id_rsa" > ~/.ssh/config
+        echo "${{ secrets.AWS_PEM_KEY }}" > ~/.ssh/Key-Avatares.pem
+        chmod 600 ~/.ssh/Key-Avatares.pem
+        echo -e "Host ec2-instance\n\tHostName ec2-54-235-18-148.compute-1.amazonaws.com\n\tUser ec2-user\n\tIdentityFile ~/.ssh/Key-Avatares.pem" > ~/.ssh/config
         ssh-keyscan -H ec2-54-235-18-148.compute-1.amazonaws.com >> ~/.ssh/known_hosts
 
     - name: Copy files to EC2
@@ -27,4 +27,4 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        ssh ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "chmod +x ~/deploy_k8s.sh && ~/deploy_k8s.sh"
+        ssh ec2-instance "chmod +x ~/deploy_k8s.sh && ~/deploy_k8s.sh"

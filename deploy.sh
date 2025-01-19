@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------------
-# Script de despliegue LOCAL en Docker para la aplicación Avatares.
-# Utilizamdo Docker Compose para gestionar los servicios.
+# Script de despliegue LOCAL y subida a Docker Hub para la aplicación Avatares.
+# Utiliza Docker Compose para gestionar los servicios e incluye la subida de imágenes.
 #
 # Uso:
-#   ./deploy.sh dev
+#   ./deploy_docker.sh dev
 #
 # -----------------------------------------------------------
 
@@ -17,7 +17,13 @@ BOLD='\033[1m'
 RESET='\033[0m'
 # ============================================================ #
 
+# ==================== VARIABLES ==================== #
 ENVIRONMENT="$1"
+DOCKER_USER="chelemovil87" # Cambia esto por tu usuario de Docker Hub
+BACKEND_IMAGE="$DOCKER_USER/proyectodevops-backend"
+FRONTEND_IMAGE="$DOCKER_USER/proyectodevops-frontend"
+TAG="v1.0"
+# ==================================================== #
 
 if [ -z "$ENVIRONMENT" ]; then
   echo -e "${RED}Error:${RESET} No se ha especificado el entorno (dev o prod)."
@@ -29,20 +35,53 @@ echo -e "${YELLOW}========================================${RESET}"
 echo -e "${YELLOW} Despliegue Docker en entorno: ${BOLD}$ENVIRONMENT${RESET}"
 echo -e "${YELLOW}========================================${RESET}"
 
-# 1. Construir y arrancar los servicios con docker-compose
-echo -e "${BLUE}[1/2]${RESET} ${BOLD}Construyendo y desplegando servicios...${RESET}"
+# 1. Construir y etiquetar imágenes
+echo -e "${BLUE}[1/4]${RESET} ${BOLD}Construyendo imágenes Docker...${RESET}"
+
+docker-compose -f docker-compose.yml build
+
+if [ $? -ne 0 ]; then
+  echo -e "${RED}ERROR:${RESET} Falló la construcción de las imágenes."
+  exit 1
+fi
+
+echo -e "${GREEN}Imágenes construidas con éxito.${RESET}"
+
+# 2. Etiquetar imágenes para Docker Hub
+echo -e "${BLUE}[2/4]${RESET} ${BOLD}Etiquetando imágenes...${RESET}"
+
+docker tag proyectodevops-backend:latest $BACKEND_IMAGE:$TAG
+docker tag proyectodevops-frontend:latest $FRONTEND_IMAGE:$TAG
+
+echo -e "${GREEN}Imágenes etiquetadas con éxito.${RESET}"
+
+# 3. Subir imágenes a Docker Hub
+echo -e "${BLUE}[3/4]${RESET} ${BOLD}Subiendo imágenes a Docker Hub...${RESET}"
+
+docker push $BACKEND_IMAGE:$TAG
+docker push $FRONTEND_IMAGE:$TAG
+
+if [ $? -ne 0 ]; then
+  echo -e "${RED}ERROR:${RESET} Falló la subida de las imágenes a Docker Hub."
+  exit 1
+fi
+
+echo -e "${GREEN}Imágenes subidas con éxito a Docker Hub.${RESET}"
+
+# 4. Arrancar servicios con docker-compose
+echo -e "${BLUE}[4/4]${RESET} ${BOLD}Desplegando servicios...${RESET}"
 
 docker-compose -f docker-compose.yml up --build -d
 
 if [ $? -ne 0 ]; then
-  echo -e "${RED}ERROR:${RESET} Falló la construcción o despliegue de los servicios."
+  echo -e "${RED}ERROR:${RESET} Falló el despliegue de los servicios."
   exit 1
 fi
 
-echo -e "${GREEN}Servicios construidos y desplegados con éxito.${RESET}"
+echo -e "${GREEN}Servicios desplegados con éxito.${RESET}"
 
-# 2. Verificar servicios en ejecución
-echo -e "${BLUE}[2/2]${RESET} ${BOLD}Verificando servicios en ejecución...${RESET}"
+# 5. Verificar servicios en ejecución
+echo -e "${BLUE}Verificando servicios en ejecución...${RESET}"
 docker-compose ps
 
 echo -e "${YELLOW}========================================${RESET}"

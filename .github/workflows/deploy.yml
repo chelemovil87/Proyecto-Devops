@@ -30,7 +30,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com "
           if [ ! -d ~/ProyectoDevops ]; then
-            git clone https://github.com/tu_usuario/tu_repositorio.git ~/ProyectoDevops;
+            git clone https://github.com/chelemovil87/Proyecto-Devops-.git;
           else
             cd ~/ProyectoDevops && git pull origin main;
           fi

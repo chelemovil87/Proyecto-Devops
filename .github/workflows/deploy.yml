@@ -20,17 +20,21 @@ jobs:
         AWS_PEM_KEY: ${{ secrets.AWS_PEM_KEY }}
         USER_URL: ${{ secrets.USER_URL }}
       run: |
-
+        # Crear archivo PEM
         echo "$AWS_PEM_KEY" > Key-Avatares.pem
         chmod 600 Key-Avatares.pem
-        
-        << 'EOF'
-        echo "Clonando o actualizando el repositorio..."
-        git clone https://github.com/chelemovil87/Proyecto-Devops.git ~/ProyectoDevops        
-        cd ~/ProyectoDevops && git pull origin main 
 
-        echo "Ejecutando script de despliegue..."
-        cd ~/ProyectoDevops 
-        chmod +x deploy_k8s.sh 
-        ./deploy_k8s.sh
+        # Conectarse al servidor EC2 y ejecutar comandos
+        ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL << 'EOF'
+          echo "Clonando o actualizando el repositorio..."
+          if [ ! -d ~/ProyectoDevops ]; then
+            git clone https://github.com/chelemovil87/Proyecto-Devops.git ~/ProyectoDevops
+          else
+            cd ~/ProyectoDevops && git pull origin main
+          fi
+
+          echo "Ejecutando script de despliegue..."
+          cd ~/ProyectoDevops &&
+          chmod +x deploy_k8s.sh &&
+          ./deploy_k8s.sh
         EOF

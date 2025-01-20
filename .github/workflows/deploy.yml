@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -15,20 +18,16 @@ jobs:
       uses: actions/checkout@v3
 
     # 2. Configurar acceso SSH
-    - name: Configure SSH access
+    - name: Conexion SSH con EC2
+      env:
+        USER_PASSWORD: ${{ secrets.AWS_PEM_KEY }}
+        USER_URL: ${{ secrets.USER_URL }}
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.AWS_PEM_KEY }}" > ~/.ssh/Key-Avatares.pem
-        chmod 600 ~/.ssh/Key-Avatares.pem
-        cat <<EOL >> ~/.ssh/known_hosts
-        |1|VSBvKChukatmuHNb2uhxWduKWBE=|hJaitrBU2ZhxYwRLpCJX9UjVReE= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBB2rP5ZHz4G2iUfu9G2ZTVSvR4HZJgUGBvXTGGSH2oV7avbTSW19t7qRUuJAlvcVxszy/tPd7E/yDCj7zje+tm8=
-        |1|eZivNjLUFdrYuvnjzOWd7/3hf0A=|zD4YAoSefrkWlLFimIFbRfkjfA0= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEHbVwOFAJETZIf01Al4EsiGLJBQhDXIaMPNWPkHzG9E
-        EOL
+        ssh -i USER_PASSWORD USER_URL
 
     # 3. Sincronizar el repositorio en EC2 y desplegar
     - name: Sync Repository and Deploy
       run: |
-        ssh -i ~/.ssh/Key-Avatares.pem ec2-user@ec2-54-235-18-148.compute-1.amazonaws.com
           if [ ! -d ~/ProyectoDevops ]; then
             git clone https://github.com/chelemovil87/Proyecto-Devops-.git ~/ProyectoDevops;
           else
@@ -37,4 +36,4 @@ jobs:
           cd ~/ProyectoDevops &&
           chmod +x deploy_k8s.sh &&
           ./deploy_k8s.sh
-        "
+        

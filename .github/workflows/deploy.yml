@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   deploy:
@@ -23,24 +20,21 @@ jobs:
         USER_PASSWORD: ${{ secrets.AWS_PEM_KEY }}
         USER_URL: ${{ secrets.USER_URL }}
       run: |
-        # Crear archivo PEM
-        echo "$USER_PASSWORD" > Key-Avatares.pem
-        chmod 400 Key-Avatares.pem
 
         # Clonar el repositorio y ejecutar despliegue en EC2
-        ssh -i "Key-Avatares.pem" $USER_URL << 'EOF'
+        ssh -i $USER_PASSWORD $USER_URL << 'EOF'
           # Configurar KUBECONFIG
           export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
           # Sincronizar repositorio
           if [ ! -d ~/ProyectoDevops ]; then
-            git clone https://github.com/chelemovil87/Proyecto-Devops-.git ~/ProyectoDevops;
+            git clone https://github.com/chelemovil87/Proyecto-Devops-.git;
           else
-            cd ~/ProyectoDevops && git pull origin main;
+            cd ~/Proyecto-Devops && git pull origin main;
           fi
 
           # Ejecutar el script de despliegue
-          cd ~/ProyectoDevops &&
+          cd ~/Proyecto-Devops &&
           chmod +x deploy_k8s.sh &&
           ./deploy_k8s.sh
         EOF

@@ -17,25 +17,30 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2. Configurar acceso SSH
-    - name: Conexion SSH con EC2
+    # 2. Configurar acceso SSH y ejecutar comandos en EC2
+    - name: Deploy to EC2
       env:
         USER_PASSWORD: ${{ secrets.AWS_PEM_KEY }}
         USER_URL: ${{ secrets.USER_URL }}
-      run: 
+      run: |
+        # Crear archivo PEM
         echo "$USER_PASSWORD" > Key-Avatares.pem
         chmod 600 Key-Avatares.pem
-        ssh -i "Key-Avatares.pem" USER_URL
 
-    # 3. Sincronizar el repositorio en EC2 y desplegar
-    - name: Sync Repository and Deploy
-      run: |
+        # Clonar el repositorio y ejecutar despliegue en EC2
+        ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL << 'EOF'
+          # Configurar KUBECONFIG
+          export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+          # Sincronizar repositorio
           if [ ! -d ~/ProyectoDevops ]; then
             git clone https://github.com/chelemovil87/Proyecto-Devops-.git ~/ProyectoDevops;
           else
             cd ~/ProyectoDevops && git pull origin main;
           fi
+
+          # Ejecutar el script de despliegue
           cd ~/ProyectoDevops &&
           chmod +x deploy_k8s.sh &&
           ./deploy_k8s.sh
-        
+        EOF

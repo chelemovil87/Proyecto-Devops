@@ -20,12 +20,9 @@ jobs:
         AWS_PEM_KEY: ${{ secrets.AWS_PEM_KEY }}
         USER_URL: ${{ secrets.USER_URL }}
       run: |
-        
-        echo "$AWS_PEM_KEY" > Key-Avatares.pem
-        chmod 600 Key-Avatares.pem
 
         # Clonar el repositorio y ejecutar despliegue en EC2
-        ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL 
+        ssh -o StrictHostKeyChecking=no -i $AWS_PEM_KEY $USER_URL 
         
         << 'EOF'
           # Configurar KUBECONFIG

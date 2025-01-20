@@ -14,7 +14,8 @@ fi
 # Aplicar los manifiestos
 kubectl apply -f namespace.yaml
 kubectl apply -f api/backend-deployment.yaml
+kubectl apply -f api/backend-service.yaml
 kubectl apply -f web/frontend-deployment.yaml
-
+kubectl apply -f web/frontend-service.yaml
 echo "Despliegue completado. Estado de los pods:"
 kubectl get pods -n production

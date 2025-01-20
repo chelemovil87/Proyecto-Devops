@@ -17,15 +17,17 @@ jobs:
     # 2. Configurar acceso SSH y ejecutar comandos en EC2
     - name: Deploy to EC2
       env:
-        USER_PASSWORD: ${{ secrets.AWS_PEM_KEY }}
+        AWS_PEM_KEY: ${{ secrets.AWS_PEM_KEY }}
         USER_URL: ${{ secrets.USER_URL }}
       run: |
         
-        echo "$USER_PASSWORD" > Key-Avatares.pem
+        echo "$AWS_PEM_KEY" > Key-Avatares.pem
         chmod 600 Key-Avatares.pem
 
         # Clonar el repositorio y ejecutar despliegue en EC2
-        ssh -i "Key-Avatares.pem" $USER_URL << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL 
+        
+        << 'EOF'
           # Configurar KUBECONFIG
           export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 

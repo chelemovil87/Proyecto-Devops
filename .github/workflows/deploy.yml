@@ -22,8 +22,10 @@ jobs:
       env:
         USER_PASSWORD: ${{ secrets.AWS_PEM_KEY }}
         USER_URL: ${{ secrets.USER_URL }}
-      run: |
-        ssh -i USER_PASSWORD USER_URL
+      run: 
+        echo "$USER_PASSWORD" > Key-Avatares.pem
+        chmod 600 Key-Avatares.pem
+        ssh -i "Key-Avatares.pem" USER_URL
 
     # 3. Sincronizar el repositorio en EC2 y desplegar
     - name: Sync Repository and Deploy

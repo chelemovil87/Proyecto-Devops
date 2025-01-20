@@ -26,6 +26,7 @@ jobs:
 
         # Conectarse al servidor EC2 y ejecutar comandos
         ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL << 'EOF'
+          
           echo "Verificando si Git está instalado..."
           if ! command -v git &> /dev/null; then
             echo "Git no está instalado. Instalándolo..."

@@ -26,23 +26,11 @@ jobs:
         
         << 'EOF'
         echo "Clonando o actualizando el repositorio..."
-        if [ ! -d ~/ProyectoDevops ]; then
-            git clone https://github.com/chelemovil87/Proyecto-Devops.git ~/ProyectoDevops || {
-            echo "Error: No se pudo clonar el repositorio."
-            exit 1
-            }
-        else
-            cd ~/ProyectoDevops && git pull origin main || {
-            echo "Error: No se pudo actualizar el repositorio."
-            exit 1
-          }
-        fi
+        git clone https://github.com/chelemovil87/Proyecto-Devops.git ~/ProyectoDevops        
+        cd ~/ProyectoDevops && git pull origin main 
 
-          echo "Ejecutando script de despliegue..."
-          cd ~/ProyectoDevops &&
-          chmod +x deploy_k8s.sh &&
-          ./deploy_k8s.sh || {
-          echo "Error: El script de despliegue falló."
-          exit 1
-          }
+        echo "Ejecutando script de despliegue..."
+        cd ~/ProyectoDevops 
+        chmod +x deploy_k8s.sh 
+        ./deploy_k8s.sh
         EOF

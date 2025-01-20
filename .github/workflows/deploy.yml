@@ -24,7 +24,7 @@ jobs:
         # Clonar el repositorio y ejecutar despliegue en EC2
         ssh -o StrictHostKeyChecking=no -i $AWS_PEM_KEY $USER_URL 
         
-        << 'EOF'
+        
           # Configurar KUBECONFIG
           export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
@@ -39,4 +39,4 @@ jobs:
           cd ~/Proyecto-Devops &&
           chmod +x deploy_k8s.sh &&
           ./deploy_k8s.sh
-        EOF
+        

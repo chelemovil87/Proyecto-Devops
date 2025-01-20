@@ -23,22 +23,26 @@ jobs:
 
         echo "$AWS_PEM_KEY" > Key-Avatares.pem
         chmod 600 Key-Avatares.pem
-
-        # Clonar el repositorio y ejecutar despliegue en EC2
-        ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL 
         
-          << 'EOF'          # Configurar KUBECONFIG
-          export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+        << 'EOF'
+        echo "Clonando o actualizando el repositorio..."
+        if [ ! -d ~/ProyectoDevops ]; then
+            git clone https://github.com/chelemovil87/Proyecto-Devops.git ~/ProyectoDevops || {
+            echo "Error: No se pudo clonar el repositorio."
+            exit 1
+            }
+        else
+            cd ~/ProyectoDevops && git pull origin main || {
+            echo "Error: No se pudo actualizar el repositorio."
+            exit 1
+          }
+        fi
 
-          # Sincronizar repositorio
-          if [ ! -d ~/Proyecto-Devops ]; then
-            git clone https://github.com/chelemovil87/Proyecto-Devops.git;
-          else
-            cd ~/Proyecto-Devops && git pull origin main;
-          fi
-
-          # Ejecutar el script de despliegue
-          cd ~/Proyecto-Devops &&
+          echo "Ejecutando script de despliegue..."
+          cd ~/ProyectoDevops &&
           chmod +x deploy_k8s.sh &&
-          ./deploy_k8s.sh
+          ./deploy_k8s.sh || {
+          echo "Error: El script de despliegue falló."
+          exit 1
+          }
         EOF

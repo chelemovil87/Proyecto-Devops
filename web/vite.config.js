@@ -4,6 +4,7 @@ import reactRefresh from '@vitejs/plugin-react-refresh'
 export default defineConfig({
   logLevel: 'info',
   plugins: [reactRefresh()],
+  base: './',
   server: {
     host: process.env.VITE_HOST || '0.0.0.0',
     port: process.env.VITE_PORT ? Number(process.env.VITE_PORT) : 5173,

@@ -32,7 +32,7 @@ jobs:
 
           # Sincronizar repositorio
           if [ ! -d ~/Proyecto-Devops ]; then
-            git clone https://github.com/chelemovil87/Proyecto-Devops-.git;
+            git clone https://github.com/chelemovil87/Proyecto-Devops.git;
           else
             cd ~/Proyecto-Devops && git pull origin main;
           fi

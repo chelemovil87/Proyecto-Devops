@@ -27,14 +27,6 @@ jobs:
         # Conectarse al servidor EC2 y ejecutar comandos
         ssh -o StrictHostKeyChecking=no -i "Key-Avatares.pem" $USER_URL << 'EOF'
           
-          echo "Verificando si Git está instalado..."
-          if ! command -v git &> /dev/null; then
-            echo "Git no está instalado. Instalándolo..."
-            sudo yum install -y git
-          else
-            echo "Git ya está instalado."
-          fi
-          
           echo "Clonando o actualizando el repositorio..."
           if [ ! -d ~/ProyectoDevops ]; then
             git clone https://github.com/chelemovil87/Proyecto-Devops.git ~/ProyectoDevops
